@@ -15,6 +15,7 @@ public class FtpdemoApplication {
 
     public static void main(String[] args) throws IOException {
 
+//        https://stackoverflow.com/questions/39922534/ftpsclient-listfiles-not-working-for-nonstop-tandem-system
 //		https://stackoverflow.com/questions/36302985/how-to-connect-to-ftp-over-tls-ssl-ftps-server-in-java
 //		https://www.youtube.com/watch?v=8w-vilHEoj4
 //		https://www.baeldung.com/java-ftp-client
@@ -32,7 +33,7 @@ public class FtpdemoApplication {
 //		String pass = "rNrKYTX9g7z3RgJRmxWuGHbeu";
 
 
-        FTPSClient ftp = new FTPSClient();
+        FTPSClient ftp = new FTPSClient(false);
 
         try {
             ftp.connect(server, port);
@@ -46,18 +47,32 @@ public class FtpdemoApplication {
 
             boolean success = ftp.login(user, pass);
             showServerReply(ftp);
-            log.info(String.valueOf(success));
+
             if (!success) {
                 log.info("Failed to log into the server");
                 return;
             } else {
                 log.info("LOGGED IN SERVER SUCCESSFULLY");
                 // LIST ALL FILES AND FOLDER IN FTP SERVER
-				// NEED TO WORK ON THIS LOGIC
-//                String remoteDirPath = "/Test";
-//                String saveDirPath = "C:/Test/FTP";
+                // Set protection buffer size
+                ftp.execPBSZ(0);
 
-//                downloadDirectory(ftp, remoteDirPath, "", saveDirPath);
+                // Set data channel protection to private
+                ftp.execPROT("P");
+
+                // Enter local passive mode
+                ftp.enterLocalPassiveMode();
+
+                // Get Current Working Directory
+                ftp.printWorkingDirectory();
+                showServerReply(ftp);
+
+                // This will List the files
+                FTPFile[]   allFilesAndDirectories = ftp.listFiles();
+
+                printFileAndDirectoryDetails(allFilesAndDirectories);
+                downloadDirectory(ftp,"/","/","C:/Users/sandy/Desktop/New folder (2)/FTPJavaConnection/FTP");
+
 
                 ftp.logout();
                 ftp.disconnect();
@@ -71,6 +86,21 @@ public class FtpdemoApplication {
 
 
 //        SpringApplication.run(FtpdemoApplication.class, args);
+    }
+
+    private static void printFileAndDirectoryDetails(FTPFile[] allFilesAndDirectories) {
+        // iterates over the files and prints details for each
+        DateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        for (FTPFile file : allFilesAndDirectories) {
+            String details = file.getName();
+            if (file.isDirectory()) {
+                details = "[" + details + "]";
+            }
+            details += "\t\t" + file.getSize();
+            details += "\t\t" + dateFormater.format(file.getTimestamp().getTime());
+            System.out.println(details);
+        }
     }
 
 
