@@ -32,7 +32,7 @@ public class FtpdemoApplication {
             FTPFile[] allFilesAndDirectories = client.listFiles();
 
             DownloadFTPFilesAndDirectories.printFileAndDirectoryDetails(allFilesAndDirectories);
-            DownloadFTPFilesAndDirectories.downloadDirectory(client, "/", "/", "C:/Users/sandy/Desktop/New folder (2)/FTPJavaConnection/FTP");
+            DownloadFTPFilesAndDirectories.downloadDirectory(client, "/", "/", "ftpdemo/src/main/resources/FTP");
             ConnectToFTPServer.showServerReply(client);
         } catch (IOException ex) {
             log.error("Connection issue with FTP server");
@@ -41,6 +41,7 @@ public class FtpdemoApplication {
             try {
                 if (client.isConnected()) {
                     client.logout();
+                    ConnectToFTPServer.showServerReply(client);
                     client.disconnect();
                 }
             } catch (IOException ex) {
